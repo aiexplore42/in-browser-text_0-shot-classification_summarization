@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>In‑browser Zero‑Shot Classification Demo</title>
+    <style>
+        /* ---------- Simple, readable style ---------- */
+        :root{
+            --accent:#0066cc;          /* main colour */
+            --accent‑dark:#004c99;     /* hover */
+            --bg:#f9fbfd;             /* page background */
+            --card:#ffffff;           /* white panel */
+            --text:#222222;
+            --muted:#555555;
+        }
+        body{
+            font-family:Arial,Helvetica,sans-serif;
+            margin:0;
+            padding:0;
+            background:var(--bg);
+            color:var(--text);
+            line-height:1.6;
+        }
+        .wrap{
+            max-width:860px;
+            margin:2rem auto;
+            padding:0 1rem;
+        }
+        h1{
+            text-align:center;
+            margin-bottom:0.4rem;
+            font-size:2rem;
+        }
+        .card{
+            background:var(--card);
+            border:1px solid #e0e0e0;
+            border-radius:8px;
+            padding:1.4rem;
+            box-shadow:0 2px 6px rgba(0,0,0,.04);
+        }
+        a.btn{
+            display:inline-block;
+            margin:1.5rem auto;
+            padding:.8rem 1.4rem;
+            background:var(--accent);
+            color:#fff;
+            text-decoration:none;
+            border-radius:6px;
+            font-size:1.1rem;
+            text-align:center;
+            transition:background .2s;
+        }
+        a.btn:hover{background:var(--accent‑dark);}
+        ol{margin-left:1.2rem;}
+        .footer{
+            margin-top:3rem;
+            font-size:.85rem;
+            color:var(--muted);
+            text-align:center;
+        }
+        .disclaimer{
+            margin-top:1rem;
+            padding:.8rem;
+            background:#fff8e1;
+            border-left:4px solid #ff9800;
+            font-size:.78rem;
+            color:#555;
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <h1>In‑browser Zero‑Shot Classification</h1>
+
+    <div class="card">
+        <!-- 1️⃣ What it is -->
+        <p><strong>What does “zero‑shot classification” mean?</strong> 
+        Imagine you have a list of topics – “education”, “politics”, “business”.  
+        Without teaching the model those topics beforehand, you ask it:  
+        “Which of these topics best describes the sentence below?”  
+        The model looks at the sentence and picks the most likely label(s).  
+        That’s zero‑shot: it works on categories it has never seen during training.</p>
+
+        <!-- 2️⃣ Why run it in the browser? -->
+        <p><strong>Why run it in your browser?</strong> 
+        The model and its weights are downloaded once, then all calculations happen **locally** on your computer (using WebGPU or WebAssembly).  
+        No data leaves your device, and after the first download you can use it offline.</p>
+
+        <!-- 3️⃣ What the demo offers -->
+        <p><strong>What this demo does</strong></p>
+        <ul>
+            <li>Choose the compute backend – WebGPU (fastest if supported), WASM, or “auto”.</li>
+            <li>See a progress bar while the model files download.</li>
+            <li>Two ready‑to‑use pipelines:
+                <ul>
+                    <li>Zero‑shot classification (the focus of this page)</li>
+                    <li>Summarisation (you can experiment with it too)</li>
+                </ul>
+            </li>
+            <li>Works in modern desktop browsers (Chrome ≥ 112, Edge, Safari with WebGPU).</li>
+        </ul>
+
+        <!-- 4️⃣ Call‑to‑action button -->
+        <a href="pipelines_demo_with_opts.html"
+           target="_blank"
+           class="btn"
+           aria-label="Open the zero‑shot classification demo in a new tab">
+            Launch Demo →
+        </a>
+    </div>
+
+    <!-- 5️⃣ Quick‑start steps -->
+    <h2>How to use the demo</h2>
+    <ol>
+        <li>Select a device/backend (leave “auto” if you’re unsure).</li>
+        <li>Enter the sentence you want to classify.</li>
+        <li>Enter a comma‑separated list of labels (e.g., <code>education, politics, business</code>).</li>
+        <li>Click <strong>Classify</strong> and watch the result appear.</li>
+    </ol>
+
+    <div class="footer">
+        © 2026 Fluxpuls – Powered by <a href="https://proton.me" target="_blank">Xenova/transformers</a>.
+        <div class="disclaimer">
+            <strong>Disclaimer:</strong> The AI output is for demonstration only and may contain
+            inaccuracies or bias. Do not rely on it for legal, medical, financial, or safety‑critical decisions.
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
