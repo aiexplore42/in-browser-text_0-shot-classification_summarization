@@ -2,14 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>In‑browser Zero‑Shot Classification Demo</title>
+    <!-- Page title -->
+    <title>
+        In‑browser Zero‑Shot Classification &amp; Summarization using small open‑source models on Hugging Face optimized for browsers
+    </title>
     <style>
         /* ---------- Simple, readable style ---------- */
         :root{
             --accent:#0066cc;          /* main colour */
-            --accent‑dark:#004c99;     /* hover */
-            --bg:#f9fbfd;             /* page background */
-            --card:#ffffff;           /* white panel */
+            --accent-dark:#004c99;     /* hover colour */
+            --bg:#f9fbfd;              /* page background */
+            --card:#ffffff;            /* white panel */
             --text:#222222;
             --muted:#555555;
         }
@@ -50,7 +53,7 @@
             text-align:center;
             transition:background .2s;
         }
-        a.btn:hover{background:var(--accent‑dark);}
+        a.btn:hover{background:var(--accent-dark);}
         ol{margin-left:1.2rem;}
         .footer{
             margin-top:3rem;
@@ -65,6 +68,11 @@
             border-left:4px solid #ff9800;
             font-size:.78rem;
             color:#555;
+        }
+        /* Small‑screen tweak */
+        @media (max-width:600px){
+            .wrap{margin:1rem auto;padding:0 .5rem;}
+            h1{font-size:1.6rem;}
         }
     </style>
 </head>
@@ -84,8 +92,7 @@
 
         <!-- 2️⃣ Why run it in the browser? -->
         <p><strong>Why run it in your browser?</strong> 
-        The model and its weights are downloaded once, then all calculations happen **locally** on your computer (using WebGPU or WebAssembly).  
-        No data leaves your device, and after the first download you can use it offline.</p>
+        The model and its weights are downloaded once, then all calculations happen <b>locally</b> on your computer (using WebGPU or WebAssembly). No data leaves your device, and after the first download you can use it offline.</p>
 
         <!-- 3️⃣ What the demo offers -->
         <p><strong>What this demo does</strong></p>
@@ -108,9 +115,14 @@
            aria-label="Open the zero‑shot classification demo in a new tab">
             Launch Demo →
         </a>
+
+        <!-- 5️⃣ Troubleshooting line -->
+        <p style="margin-top:1rem;font-size:0.9em;color:#555;">
+            <b>Troubleshooting:</b> If the demo stays on “Model not loaded”, open the browser console (F12) to see any error messages, ensure you are loading the page from its HTTPS GitHub Pages URL, and disable any ad‑blocking extensions that might block model downloads.
+        </p>
     </div>
 
-    <!-- 5️⃣ Quick‑start steps -->
+    <!-- 6️⃣ Quick‑start steps -->
     <h2>How to use the demo</h2>
     <ol>
         <li>Select a device/backend (leave “auto” if you’re unsure).</li>
@@ -120,7 +132,7 @@
     </ol>
 
     <div class="footer">
-        © 2026 Fluxpuls – Powered by <a href="https://proton.me" target="_blank">Xenova/transformers</a>.
+        © 2026 Fluxpuls – Powered by Xenova/transformers.
         <div class="disclaimer">
             <strong>Disclaimer:</strong> The AI output is for demonstration only and may contain
             inaccuracies or bias. Do not rely on it for legal, medical, financial, or safety‑critical decisions.
