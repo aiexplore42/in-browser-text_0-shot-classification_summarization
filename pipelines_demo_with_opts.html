@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Pipelines demo — options &amp; progress</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 18px; }
+    textarea, input, select { width: 100%; box-sizing: border-box; margin: 6px 0; }
+    .panel { border: 1px solid #ddd; padding: 12px; margin: 12px 0; border-radius: 6px; }
+    button { padding: 8px 12px; }
+    pre { background:#f7f7f7; padding:10px; overflow:auto; }
+    .small { font-size: 0.9em; color: #555; }
+  </style>
+</head>
+<body>
+  <h2>In-browser pipelines with device &amp; progress</h2>
+
+  <label for="device">Device / backend:</label>
+  <select id="device">
+    <option value="auto">auto (prefer WebGPU if available)</option>
+    <option value="webgpu">webgpu</option>
+    <option value="wasm">wasm</option>
+  </select>
+  <div class="small">Note: WebGPU requires a supported browser and OS.</div>
+
+  <div class="panel">
+    <h3>Zero-shot classification</h3>
+    <label>Model (change if desired):</label>
+    <input id="zs_model" value="Xenova/roberta-base-mnli" />
+    <div id="zs_progress" class="small">Not started</div>
+    <label>Text (premise):</label>
+    <textarea id="zs_text" rows="3">This is a course about the Transformers library</textarea>
+    <label>Labels (comma-separated):</label>
+    <input id="zs_labels" value="education,politics,business" />
+    <button id="zs_run">Classify</button>
+    <pre id="zs_out">Model not loaded</pre>
+  </div>
+
+  <div class="panel">
+    <h3>Summarization</h3>
+    <label>Model (change if desired):</label>
+    <input id="sum_model" value="Xenova/sshleifer-tiny-mbart-cnndm" />
+    <div id="sum_progress" class="small">Not started</div>
+    <label>Article / Long text:</label>
+    <textarea id="sum_text" rows="6">The Transformers library by Hugging Face provides state-of-the-art pretrained models for NLP. Running such models in the browser is possible using transformers.js (Xenova) which compiles runtimes to WASM/WebGPU and downloads model weights into the browser. This allows offline inference after initial download, though model size and speed depend on the chosen model and device support in the browser.</textarea>
+    <label>Summary max length (tokens):</label>
+    <input id="sum_max" value="60" />
+    <button id="sum_run">Summarize</button>
+    <pre id="sum_out">Model not loaded</pre>
+  </div>
+
+  <script type="module">
+    import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@latest/dist/transformers.esm.js';
+
+    const zsOut = s => document.getElementById('zs_out').textContent = s;
+    const sumOut = s => document.getElementById('sum_out').textContent = s;
+    const zsProg = s => document.getElementById('zs_progress').textContent = s;
+    const sumProg = s => document.getElementById('sum_progress').textContent = s;
+
+    let zsPipeline = null;
+    let sumPipeline = null;
+
+    function getDevice() {
+      const sel = document.getElementById('device').value;
+      return sel === 'auto' ? undefined : sel;   // undefined lets transformers.js pick automatically
+    }
+
+    async function loadPipeline(task, model, progressFn) {
+      progressFn('Initializing...');
+      const device = getDevice();
+      if (device) env.backend = device;   // 'wasm' or 'webgpu'
+
+      try {
+        progressFn('Loading model files (this may take a few seconds)…');
+        const p = await pipeline(task, model);
+        progressFn('Loaded');
+        return p;
+      } catch (e) {
+        progressFn('Load error: ' + e);
+        throw e;
+      }
+    }
+
+    async function initPipelines() {
+      zsOut('Waiting for models to load…');
+      sumOut('Waiting for models to load…');
+
+      const zsModel = document.getElementById('zs_model').value.trim();
+      const sumModel = document.getElementById('sum_model').value.trim();
+
+      try {
+        const [zs, sum] = await Promise.all([
+          loadPipeline('zero-shot-classification', zsModel, zsProg),
+          loadPipeline('summarization', sumModel, sumProg)
+        ]);
+        zsPipeline = zs;
+        sumPipeline = sum;
+        zsOut('Zero‑shot ready — enter text & labels, then click Classify.');
+        sumOut('Summarizer ready — enter text, adjust max length, then click Summarize.');
+      } catch {
+        zsOut('Initialization error');
+        sumOut('Initialization error');
+      }
+    }
+
+    // ----- Run zero‑shot -----
+    document.getElementById('zs_run').onclick = async () => {
+      if (!zsPipeline) { zsOut('Model not ready'); return; }
+      const text = document.getElementById('zs_text').value;
+      const labels = document.getElementById('zs_labels')
+                         .value.split(',')
+                         .map(s => s.trim())
+                         .filter(Boolean);
+      if (!text || !labels.length) { zsOut('Provide text and at least one label'); return; }
+
+      zsOut('Running…');
+      try {
+        const res = await zsPipeline(text, { candidate_labels: labels });
+        zsOut(JSON.stringify(res, null, 2));
+      } catch (e) {
+        zsOut('Error: ' + e);
+      }
+    };
+
+    // ----- Run summarization -----
+    document.getElementById('sum_run').onclick = async () => {
+      if (!sumPipeline) { sumOut('Model not ready'); return; }
+      const text = document.getElementById('sum_text').value;
+      const max_length = parseInt(document.getElementById('sum_max').value) || 60;
+      if (!text) { sumOut('Provide text to summarize'); return; }
+
+      sumOut('Running…');
+      try {
+        const res = await sumPipeline(text, { max_length });
+        sumOut(JSON.stringify(res, null, 2));
+      } catch (e) {
+        sumOut('Error: ' + e);
+      }
+    };
+
+    // ----- Reload pipelines when device or model changes -----
+    let reloadTimeout = null;
+    function scheduleReload() {
+      if (reloadTimeout) clearTimeout(reloadTimeout);
+      reloadTimeout = setTimeout(initPipelines, 600);   // debounce
+    }
+    document.getElementById('device').onchange = scheduleReload;
+    document.getElementById('zs_model').onchange = scheduleReload;
+    document.getElementById('sum_model').onchange = scheduleReload;
+
+    // Initial load
+    initPipelines();
+  </script>
+</body>
+</html>
